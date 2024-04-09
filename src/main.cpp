@@ -1,5 +1,5 @@
 
-#include "NoobEngine_lib.h"
+#include "PainGine_lib.h"
 
 int main()
 {
@@ -9,6 +9,10 @@ int main()
     {
         // Update
         PlatformUpdateWindow();
+        SM_TRACE("Test: ");
+        SM_WARNING("Test: ");
+        SM_ERROR("Tets: ");
+        SM_ASSERTION(false, "Assertion not hit");
     }
     
     return 0;

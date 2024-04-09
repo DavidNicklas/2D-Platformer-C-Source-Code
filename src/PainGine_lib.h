@@ -117,7 +117,9 @@ void PlatformUpdateWindow();
 // ##################################################################################
 //                                    Defines
 // ##################################################################################
-
+#ifdef _WIN32
+#define DEBUG_BREAK() __debugbreak()
+#endif
 
 // ##################################################################################
 //                                    Logging
@@ -145,7 +147,48 @@ enum TextColor
 
 
 template<typename ...Args>
-void _log(char* prefix, char* msg, TextColor textColor, Args... args);
+void _log(char* prefix, char* msg, TextColor textColor, Args... args)
+{
+    static char* textColorTable[TEXT_COLOR_COUNT] = 
+    {
+        "\x1b[30m", // TEXT_COLOR_BLACK
+        "\x1b[31m", // TEXT_COLOR_RED
+        "\x1b[32m", // TEXT_COLOR_GREEN
+        "\x1b[33m", // TEXT_COLOR_YELLOW
+        "\x1b[34m", // TEXT_COLOR_BLUE
+        "\x1b[35m", // TEXT_COLOR_MAGENTA
+        "\x1b[36m", // TEXT_COLOR_CYAN
+        "\x1b[37m", // TEXT_COLOR_WHITE
+        "\x1b[90m", // TEXT_COLOR_BTIGHT_BLACK
+        "\x1b[91m", // TEXT_COLOR_BIRGHT_RED
+        "\x1b[92m", // TEXT_COLOR_BIRGHT_GREEN
+        "\x1b[93m", // TEXT_COLOR_BRIGHT_YELLOW
+        "\x1b[94m", // TEXT_COLOR_BRIGHT_BLUE
+        "\x1b[95m", // TEXT_COLOR_BRIGHT_MAGENTA
+        "\x1b[96m", // TEXT_COLOR_BRIGHT_CYAN
+        "\x1b[97m", // TEXT_COLOR_BRIGHT_WHITE
+    };
 
+    char formatBuffer[8192] = {};
+    sprintf(formatBuffer, "%s %s %s \033[0m", textColorTable[textColor], prefix, msg);
+
+    char textBuffer[8192] = {};
+    sprintf(textBuffer, formatBuffer, args...);
+
+    puts(textBuffer);
+}
+
+#define SM_TRACE(msg, ...) _log("TRACE: ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
+#define SM_WARNING(msg, ...) _log("WARNING: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
+#define SM_ERROR(msg, ...) _log("ERROR: ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
+
+#define SM_ASSERTION(condition, msg, ...)       \
+{                                               \
+    if (!condition)                             \
+    {                                           \
+        SM_ERROR(msg, ##__VA_ARGS__);           \
+        DEBUG_BREAK();                          \
+    }                                           \
+}
 
 #pragma endregion
